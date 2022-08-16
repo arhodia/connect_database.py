@@ -39,11 +39,15 @@ pd.set_option('display.max_colwidth', 0)
 #print(merged_leftq1.head(5))
 merged_leftq1['timestamp']=pd.to_datetime(merged_leftq1['timestamp'])
 #print(merged_leftq1.head(5))
-#csv_data=merged_leftq1.to_csv('q1.csv',index=False)
+csv_data=merged_leftq1.to_csv('q1.csv',index=False)
 test_q1=merged_leftq1.head(5)
 #print(test_q1)
 data_q1=test_q1.to_json(orient='index')
-print(data_q1)
+#print(data_q1)
+
+
+
+
 
 def getAstraHTTPClient():
     """Get Astra connection information from environment variables"""
@@ -57,7 +61,7 @@ def getAstraHTTPClient():
                          astra_database_region='us-east1',
                          astra_application_token='AstraCS:oIrscKCzoGIrlhDmceGpohNQ:1018883818a02ea06a05faac3a020648029fdaebe3112707cb2f4d77c299f86c')
 
-'''
+
 def createJSONonAstra(astra_http_client):
     """Create a document on Astra using the Document API"""
 
@@ -69,5 +73,6 @@ def createJSONonAstra(astra_http_client):
         method=http_methods.PUT,
         path=f"/api/rest/v2/namespaces/{ASTRA_DB_KEYSPACE}/collections/{ASTRA_DB_COLLECTION}/{doc_uuid}",
         json_data=json.load(data_q1))
+
 
     #ghgfhfg'''
