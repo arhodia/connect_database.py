@@ -74,21 +74,21 @@ print(test_q1)
 
 #create table movies
 
-#session.execute("DROP TABLE movies_q1;")
-session.execute("CREATE TABLE IF NOT EXISTS movies_q1(userId int ,movieId int,rating float, timestamp timestamp, title text, PRIMARY KEY (userId));")
-query = "INSERT INTO movies_q1(userId,movieId,rating,timestamp,title) VALUES (?,?,?,?,?)"
-prepared = session.prepare(query)
+#session.execute("DROP TABLE IF EXISTS ssandra.movies_q1")
+#session.execute("CREATE TABLE IF NOT EXISTS movies_q1(userId int ,movieId int,rating float, timestamp timestamp, title text, PRIMARY KEY (userId));")
+#query = "INSERT INTO movies_q1(userId,movieId,rating,timestamp,title) VALUES (?,?,?,?,?)"
+#prepared = session.prepare(query)
 
 
 
 #  FIRST TRY SELECT QUERY
-for i,item in test_q1.iterrows():
-        session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
+#for i,item in test_q1.iterrows():
+#        session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
 
 #   SECOND TRY SELECT QUERY
-session.row_factory = tuple_factory
-rows = session.execute("SELECT title  FROM movies_q1 WHERE timestamp >= '2009-01-01' AND timestamp <= '2009-02-01'  ALLOW FILTERING ")
-print(rows[1])
+#session.row_factory = tuple_factory
+#rows = session.execute("SELECT title  FROM movies_q1 WHERE timestamp >= '2009-01-01' AND timestamp <= '2009-02-01'  ALLOW FILTERING ")
+#print(rows[1])
 
 
 
