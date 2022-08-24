@@ -29,13 +29,13 @@ else:
 
 session.execute("USE ssandra;")
 
-
 #******************************************************************************
 #********************  Read from 4 csvs the 50 first rows  ********************
 #******************************************************************************
 
+
 #Read and open movie.csv
-csv_filemovie = csv.reader(open('./movie.csv', 'r', encoding="utf8"))
+csv_filemovie = csv.reader(open('./movie.csv', 'r', encoding="utf-16-le"))
 dc1 = []
 movie_df = pd.read_csv("movie.csv", sep=';', header=0, on_bad_lines='skip')
 
@@ -45,7 +45,7 @@ dc2 = []
 rating_df = pd.read_csv("rating.csv", sep=';', header=0, on_bad_lines='skip')
 
 #Read and open tag.csv
-csv_filetag = csv.reader(open('./tag.csv', 'r', encoding="utf8"))
+csv_filetag = csv.reader(open('./tag.csv', 'r', encoding="utf-16-le"))
 dc3 = []
 tag_df = pd.read_csv("tag.csv", sep=',', header=0, on_bad_lines='skip')
 
@@ -87,6 +87,7 @@ df1 = predf1.head(200)
 #Εμφάνιση των ταινιών που περιέχουν τη λέξη “star”
 
 df2 = movie_df.head(200)
+#df2.fillna(0)
 #print("\nQ2:\n", df2.head(100))
 
 
@@ -95,8 +96,20 @@ df2 = movie_df.head(200)
 
 dfq3 = pd.merge(left=q1, right=avq1, how='left', left_on='movieId', right_on='movieId')
 predf3 = dfq3[['movieId', 'timestamp', 'genres', 'avg_rating', 'title']]
+
+newpredf3 = predf3.copy()
+#for index, row in predf3.iterrows():
+newpredf3['new genres']= newpredf3['genres'].str.split("|", expand =False)
+del predf3['genres']
+
+#print("\nNEWpredf3:\n", newpredf3.head(200))
+#predf3.concat([predf3,newpredf3], axis=0, ignore_index=True)
+#predf3=predf3['genres'].str.split("|")
+predf3['genres'] = newpredf3['new genres'].values
 df3 = predf3.head(200)
-#print(df3)
+
+#df3.fillna(0)
+#print("\nQ3:\n", df3)
 
 
 #Q4
@@ -134,12 +147,15 @@ del Q4["('topn_tag', 3)"]
 del Q4["('topn_tag', 4)"]
 del Q4["('topn_tag', 5)"]
 
+
 prefinaldf4 = pd.merge(left=Q4, right=avq1, how='left', left_on='movieId', right_on='movieId')
-del prefinaldf4["sum"]
-del prefinaldf4["count"]
 
-df4 = prefinaldf4.head(200)
 
+#dataframe με τις στήλες που θέλω μόνο
+prepredfQ4 = prefinaldf4[['movieId', 'title', 'genres', 'topn_tags', 'avg_rating']]
+#del prepredfQ4["avg_rating"]
+df4 = prepredfQ4.head(200)
+df4['avg_rating'] = df4['avg_rating'].fillna(0)
 print("\nQ4:\n", df4)
 
 
@@ -147,13 +163,13 @@ print("\nQ4:\n", df4)
 predf5 = pd.merge(left=df1, right=tag_df, how='left', left_on='movieId', right_on='movieId')
 preQ5 = predf5[['movieId', 'title', 'avg_rating', 'tag']]
 df5 = preQ5.head(200)
+#df5.fillna(0)
 #print("\nQ5:\n", df5)
 
 
 #***************************************************************
 #**************  Create table moviesbyAVGRATE  *****************
 #***************************************************************
-
 
 session.execute("DROP TABLE IF EXISTS ssandra.moviesbyAVGRATE")
 
@@ -172,7 +188,7 @@ for i,item in df1.iterrows():
         session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
 
 
-'''
+
 #***************************************************************
 #*****************  Create table moviesbyT  ********************
 #***************************************************************
@@ -202,8 +218,8 @@ for i,item in df2.iterrows():
 session.execute("DROP TABLE IF EXISTS ssandra.moviesbyG")
 
 
-session.execute("CREATE TABLE IF NOT EXISTS moviesbyG(movieId int, timestamp timestamp, genres ascii, avg_rating float, title text, PRIMARY KEY (movieId));")
-query = "INSERT INTO moviesbyG(movieId, timestamp, genres, avg_rating, title) VALUES (?,?,?,?,?)"
+session.execute("CREATE TABLE IF NOT EXISTS moviesbyG(movieId int,timestamp timestamp,avg_rating  float ,title text, genres list<text>, PRIMARY KEY (movieId));")
+query = "INSERT INTO moviesbyG(movieId, timestamp,avg_rating,title,genres) VALUES (?,?,?,?,?)"
 prepared = session.prepare(query)
 
 from cassandra.query import dict_factory
@@ -214,41 +230,47 @@ session.row_factory = dict_factory
 for i,item in df3.iterrows():
         session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
 
-'''
+
+
 
 #***************************************************************
 #*****************  Create table movieinfo  ********************
-#***************************************************************  avg_rating float,
+#***************************************************************
 
-
+'''
 session.execute("DROP TABLE IF EXISTS ssandra.movieinfo")
 
-
-session.execute("CREATE TABLE IF NOT EXISTS movieinfo(movieId int, title text, genres ascii, topn_tags text , PRIMARY KEY (movieId));")
-query = "INSERT INTO movieinfo(movieId, title, genres, topn_tags) VALUES (?,?,?,?)"
+session.execute("CREATE TABLE IF NOT EXISTS movieinfo(movieId int, title text, genres ascii, topn_tags text,avg_rating float, PRIMARY KEY (movieId));")
+query = "INSERT INTO movieinfo(movieId, title,genres ,topn_tags,avg_rating) VALUES (?,?,?,?,?)"
 prepared = session.prepare(query)
 
+prepared.bind(str(avg_rating) for avg_rating in row)
+prepared.bind(str(movieId) for movieId in row)
 from cassandra.query import dict_factory
 session = cluster.connect('ssandra')
 session.row_factory = dict_factory
 
 #FIRST TRY SELECT QUERY
-#for i,item in df4.iterrows():
-#        session.execute(prepared, (item[0],item[1],item[2],item[3]))
+for i,item in df4.iterrows():
+
+        session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
 
 
+'''
 #***************************************************************
 #*****************  Create table topnmovies  ********************
 #***************************************************************
 
-'''
+
 session.execute("DROP TABLE IF EXISTS ssandra.topnmovies")
 
 
 session.execute("CREATE TABLE IF NOT EXISTS topnmovies(movieId int, title text, avg_rating float, tag text,  PRIMARY KEY (movieId));")
 query = "INSERT INTO topnmovies(movieId, title, avg_rating, tag) VALUES (?,?,?,?)"
 prepared = session.prepare(query)
+'''
 
+'''
 from cassandra.query import dict_factory
 session = cluster.connect('ssandra')
 session.row_factory = dict_factory
@@ -258,16 +280,6 @@ for i,item in df5.iterrows():
         session.execute(prepared, (item[0],item[1],item[2],item[3]))
 
 '''
-
-
-
-
-
-
-
-
-'''
-
 cloud_config= {
         'secure_connect_bundle': 'C:\\Users\\Αρχοντία\\Desktop\\secure-connect-baseis2.zip'
 }
