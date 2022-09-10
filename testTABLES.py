@@ -190,11 +190,11 @@ df5 = preQ5.head(200)
 #df5.fillna(0)
 #print("\nQ5:\n", df5)
 
-
+'''
 #***************************************************************
 #**************  Create table moviesbyAVGRATE  *****************
 #***************************************************************
-'''
+
 session.execute("DROP TABLE IF EXISTS ssandra.moviesbyAVGRATE")
 
 
@@ -211,7 +211,7 @@ session.row_factory = dict_factory
 for i,item in df1.iterrows():
         session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
 
-
+'''
 
 #***************************************************************
 #*****************  Create table moviesbyT  ********************
@@ -221,8 +221,8 @@ for i,item in df1.iterrows():
 session.execute("DROP TABLE IF EXISTS ssandra.moviesbyT")
 
 
-session.execute("CREATE TABLE IF NOT EXISTS moviesbyT(movieId int, title text, genres ascii, PRIMARY KEY (movieId));")
-query = "INSERT INTO moviesbyT(movieId, title, genres) VALUES (?,?,?)"
+session.execute("CREATE TABLE IF NOT EXISTS moviesbyT(movieId int, title text, genres ascii, new list<text>, PRIMARY KEY (movieId));")
+query = "INSERT INTO moviesbyT(movieId, title, genres, new) VALUES (?,?,?,?)"
 prepared = session.prepare(query)
 
 from cassandra.query import dict_factory
@@ -230,15 +230,15 @@ session = cluster.connect('ssandra')
 session.row_factory = dict_factory
 
 #FIRST TRY SELECT QUERY
-for i,item in df2.iterrows():
-        session.execute(prepared, (item[0],item[1],item[2]))
+for i,item in df2_final.iterrows():
+        session.execute(prepared, (item[0],item[1],item[2], item[3]))
 
 
 #***************************************************************
 #*****************  Create table moviesbyG  ********************
 #***************************************************************
 
-
+'''
 session.execute("DROP TABLE IF EXISTS ssandra.moviesbyG")
 
 
@@ -255,13 +255,12 @@ for i,item in df3.iterrows():
         session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
 
 
-
+'''
 
 #***************************************************************
 #*****************  Create table movieinfo  ********************
 #***************************************************************
 
-'''
 '''
 session.execute("DROP TABLE IF EXISTS ssandra.movieinfo")
 
@@ -280,22 +279,22 @@ for i,item in df4.iterrows():
 
         session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
 
-
 '''
+
 #***************************************************************
 #*****************  Create table topnmovies  ********************
 #***************************************************************
-
 '''
+
 session.execute("DROP TABLE IF EXISTS ssandra.topnmovies")
 
 
 session.execute("CREATE TABLE IF NOT EXISTS topnmovies(movieId int, title text, avg_rating float, tag text,  PRIMARY KEY (movieId));")
 query = "INSERT INTO topnmovies(movieId, title, avg_rating, tag) VALUES (?,?,?,?)"
 prepared = session.prepare(query)
-'''
 
-'''
+
+
 from cassandra.query import dict_factory
 session = cluster.connect('ssandra')
 session.row_factory = dict_factory
@@ -304,8 +303,7 @@ session.row_factory = dict_factory
 for i,item in df5.iterrows():
         session.execute(prepared, (item[0],item[1],item[2],item[3]))
 
-'''
-'''
+
 cloud_config= {
         'secure_connect_bundle': 'C:\\Users\\Αρχοντία\\Desktop\\secure-connect-baseis2.zip'
 }
