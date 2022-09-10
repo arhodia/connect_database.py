@@ -87,8 +87,32 @@ df1 = predf1.head(200)
 #Εμφάνιση των ταινιών που περιέχουν τη λέξη “star”
 
 df2 = movie_df.head(200)
+newdf2 = df2.copy()
+newdf2['title']= newdf2['title'].str.split(" ", expand =False)
+
+newdf2=newdf2.rename(columns={"title": "new title"})
+del newdf2['movieId']
+del newdf2['genres']
+print(newdf2)
+
+df2['new'] = newdf2['new title'].values
+
+df2_final = df2.head(200)
+
+
+#df2_new=df2["title"].astype(str).values.tolist()   res = pd.Series(df2_new)
+#df2 = df2.append(pd.DataFrame([df2_new],index=[],columns=df2.columns))
+#df2 = df2({'test_set': value for value in df2_new})
+#df2 = df2.append(pd.Series(df2_new, index=df2.columns[:len(df2_new)]), ignore_index=True)
+#df2.loc[len(df2)]=df2_new
+#for i,item in df2.iterrows():
+    #col_list = df2["title"].values.tolist()
+    #print(col_list)
+   #df2["title"] = df2.replace('\n', ' ').split(".")
+   #df2['title'] = df2['title'].apply(lambda x: x.split())
+
 #df2.fillna(0)
-#print("\nQ2:\n", df2.head(100))
+print("\nQ2:\n", df2_final.head(100))
 
 
 #Q3
@@ -109,7 +133,7 @@ predf3['genres'] = newpredf3['new genres'].values
 df3 = predf3.head(200)
 
 #df3.fillna(0)
-#print("\nQ3:\n", df3)
+print("\nQ3:\n", df3)
 
 
 #Q4
@@ -156,7 +180,7 @@ prepredfQ4 = prefinaldf4[['movieId', 'title', 'genres', 'topn_tags', 'avg_rating
 #del prepredfQ4["avg_rating"]
 df4 = prepredfQ4.head(200)
 df4['avg_rating'] = df4['avg_rating'].fillna(0)
-print("\nQ4:\n", df4)
+#print("\nQ4:\n", df4)
 
 
 #Q5
@@ -170,7 +194,7 @@ df5 = preQ5.head(200)
 #***************************************************************
 #**************  Create table moviesbyAVGRATE  *****************
 #***************************************************************
-
+'''
 session.execute("DROP TABLE IF EXISTS ssandra.moviesbyAVGRATE")
 
 
@@ -238,6 +262,7 @@ for i,item in df3.iterrows():
 #***************************************************************
 
 '''
+'''
 session.execute("DROP TABLE IF EXISTS ssandra.movieinfo")
 
 session.execute("CREATE TABLE IF NOT EXISTS movieinfo(movieId int, title text, genres ascii, topn_tags text,avg_rating float, PRIMARY KEY (movieId));")
@@ -261,7 +286,7 @@ for i,item in df4.iterrows():
 #*****************  Create table topnmovies  ********************
 #***************************************************************
 
-
+'''
 session.execute("DROP TABLE IF EXISTS ssandra.topnmovies")
 
 
@@ -279,6 +304,7 @@ session.row_factory = dict_factory
 for i,item in df5.iterrows():
         session.execute(prepared, (item[0],item[1],item[2],item[3]))
 
+'''
 '''
 cloud_config= {
         'secure_connect_bundle': 'C:\\Users\\Αρχοντία\\Desktop\\secure-connect-baseis2.zip'
