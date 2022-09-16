@@ -13,7 +13,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 #**************************  Connect with astra.datastax  ***************************
 #************************************************************************************
 
-
+'''
 cloud_config= {
         'secure_connect_bundle': 'C:\\Users\\Αρχοντία\\Desktop\\secure-connect-baseis2.zip'
 }
@@ -28,7 +28,7 @@ else:
     print("An error occurred.")
 
 session.execute("USE ssandra;")
-
+'''
 #******************************************************************************
 #********************  Read from 4 csvs the 50 first rows  ********************
 #******************************************************************************
@@ -93,7 +93,7 @@ newdf2['title']= newdf2['title'].str.split(" ", expand =False)
 newdf2=newdf2.rename(columns={"title": "new title"})
 del newdf2['movieId']
 del newdf2['genres']
-print(newdf2)
+#print(newdf2)
 
 df2['new'] = newdf2['new title'].values
 
@@ -112,7 +112,7 @@ df2_final = df2.head(200)
    #df2['title'] = df2['title'].apply(lambda x: x.split())
 
 #df2.fillna(0)
-print("\nQ2:\n", df2_final.head(100))
+#print("\nQ2:\n", df2_final.head(100))
 
 
 #Q3
@@ -130,6 +130,22 @@ del predf3['genres']
 #predf3.concat([predf3,newpredf3], axis=0, ignore_index=True)
 #predf3=predf3['genres'].str.split("|")
 predf3['genres'] = newpredf3['new genres'].values
+FINALpredf3 = predf3.copy()
+FINALpredf3['title'] = ( FINALpredf3.title.str.split().apply(lambda x: ' '.join(x[::-1]).rstrip(' '))  .where(FINALpredf3['title'].str.contains(' '),FINALpredf3['title']) .str.replace(' ','  ') )
+FINALpredf3['title']= FINALpredf3['title'].str.split(" ", expand =False)
+#FINALpredf3[['title1','title2','title3']] = pd.DataFrame(FINALpredf3.title.tolist(), index= FINALpredf3.index)
+FINALpredf3["new_col"] = FINALpredf3["title"].str[0]
+FINALpredf3= FINALpredf3.replace(to_replace='\(', value="", regex=True)
+FINALpredf3= FINALpredf3.replace(to_replace='\)', value="", regex=True)
+del FINALpredf3['timestamp']
+del FINALpredf3['title']
+del FINALpredf3['genres']
+del FINALpredf3['movieId']
+del FINALpredf3['avg_rating']
+#FINALpredf3['new_col'] = FINALpredf3['new_col'].str.replace(r"\(.*\)","")
+#FINALpredf3=FINALpredf3.head(50)
+print(FINALpredf3)
+predf3['new TITLE'] = FINALpredf3['new_col'].values
 df3 = predf3.head(200)
 
 #df3.fillna(0)
@@ -212,7 +228,7 @@ for i,item in df1.iterrows():
         session.execute(prepared, (item[0],item[1],item[2],item[3],item[4]))
 
 '''
-
+'''
 #***************************************************************
 #*****************  Create table moviesbyT  ********************
 #***************************************************************
@@ -237,7 +253,7 @@ for i,item in df2_final.iterrows():
 #***************************************************************
 #*****************  Create table moviesbyG  ********************
 #***************************************************************
-
+'''
 '''
 session.execute("DROP TABLE IF EXISTS ssandra.moviesbyG")
 
